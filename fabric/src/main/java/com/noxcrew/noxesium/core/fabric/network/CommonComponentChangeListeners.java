@@ -10,6 +10,7 @@ import com.noxcrew.noxesium.api.nms.serialization.ComponentSerializerRegistry;
 import com.noxcrew.noxesium.api.registry.NoxesiumRegistries;
 import com.noxcrew.noxesium.core.fabric.NoxesiumMod;
 import com.noxcrew.noxesium.core.fabric.feature.qib.QibBehaviorModule;
+import com.noxcrew.noxesium.core.fabric.mixin.component.EntityExt;
 import com.noxcrew.noxesium.core.fabric.mixin.feature.mouse.MouseHandlerExt;
 import com.noxcrew.noxesium.core.feature.DebugOption;
 import com.noxcrew.noxesium.core.nms.registry.NmsGameComponentTypes;
@@ -28,7 +29,7 @@ public class CommonComponentChangeListeners extends NoxesiumFeature {
         listenEntity(CommonEntityComponentTypes.HITBOX_OVERRIDE, (ignored, context) -> {
             // Update the bounding box of the entity whenever a new override is received
             var entity = context.receiver();
-            entity.setBoundingBox(entity.makeBoundingBox());
+            entity.setBoundingBox(((EntityExt) entity).invokeMakeBoundingBox());
         });
         listenEntity(CommonEntityComponentTypes.QIB_BEHAVIOR, (ignored, context) -> {
             // Update an entity's membership in the spatial container when changing their qib behavior
@@ -80,6 +81,10 @@ public class CommonComponentChangeListeners extends NoxesiumFeature {
         listenGame(NmsGameComponentTypes.CUSTOM_CREATIVE_ITEMS, (ignored, context) -> {
             // Mark that the creative tab has changed so it is updated.
             NoxesiumMod.getInstance().hasCreativeTabChanged = true;
+        });
+        listenGame(CommonGameComponentTypes.DISABLE_ALL_DEBUG_RENDERERS, (ignored, context) -> {
+            // Refresh debug renderers whenever the server changes whether you can use them
+            Minecraft.getInstance().debugEntries.rebuildCurrentList();
         });
     }
 
